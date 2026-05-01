@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FlowBooks — Accounting & Projects</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{sans:['Inter','ui-sans-serif','system-ui']},boxShadow:{soft:'0 10px 30px -12px rgb(0 0 0 / .18)'}}}}</script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root{color-scheme:light dark}
+    *{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+    .scrollbar-thin::-webkit-scrollbar{width:6px;height:6px}
+    .scrollbar-thin::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:999px}
+    .dark .scrollbar-thin::-webkit-scrollbar-thumb{background:#334155}
+    dialog::backdrop{background:rgba(0,0,0,.45);backdrop-filter:blur(2px)}
+  </style>
+</head>
+<body class="h-full bg-[#f6f8fb] dark:bg-slate-950 text-slate-800 dark:text-slate-100">
+<div class="flex min-h-screen">
+  <div id="backdrop" class="fixed inset-0 bg-black/40 z-30 hidden lg:hidden"></div>
+  <aside id="sidebar" class="fixed lg:sticky top-0 z-40 h-screen w-[288px] lg:w-[288px] bg-slate-950 text-slate-200 -translate-x-full lg:translate-x-0 transition-all duration-300 flex flex-col border-r border-white/10 sidebar-expanded">
+    <div class="h-[68px] flex items-center gap-3 px-4 border-b border-white/10 shrink-0">
+      <button id="sidebarToggle" class="size-9 grid place-items-center rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 shadow-lg shadow-violet-900/20 hover:scale-105 transition">
+        <i data-lucide="layers" class="w-5 h-5 text-white"></i>
+      </button>
+      <div class="flex-1 min-w-0 sidebar-label">
+        <div class="font-semibold tracking-tight leading-none">FlowBooks</div>
+        <div class="text-[11px] text-slate-400 -mt-0.5">Dubai • AED</div>
+      </div>
+      <button class="p-1.5 rounded-lg hover:bg-white/10 lg:hidden sidebar-label" id="closeSidebar"><i data-lucide="x" class="w-4 h-4"></i></button>
+    </div>
+
+    <div class="p-3 shrink-0">
+      <div class="relative sidebar-label">
+        <i data-lucide="search" class="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500"></i>
+        <input id="sidebarSearch" placeholder="Search…" class="w-full h-8 pl-7 pr-2 rounded-lg bg-white/5 border border-white/10 text-[13px] placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-violet-500/50">
+      </div>
+      <button id="quickCreate" class="mt-2 w-full flex items-center justify-center gap-1.5 h-8 rounded-lg bg-white/10 hover:bg-white/15 text-[13px] font-medium transition sidebar-label">
+        <i data-lucide="plus" class="w-3.5 h-3.5"></i> Quick create
+      </button>
+    </div>
+
+    <nav class="flex-1 overflow-y-auto scrollbar-thin px-3 pb-3 space-y-4">
+      <div>
+        <div class="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500 sidebar-label">Workspace</div>
+        <div class="space-y-0.5">
+          <button data-nav="dashboard" class="nav-btn group w-full flex items-center gap-3 px-2.5 py-2 rounded-lg hover:bg-white/5 text-[14px] relative">
+            <i data-lucide="layout-dashboard" class="w-[18px] h-[18px] shrink-0 text-slate-400 group-[.active]:text-white"></i>
+            <span class="sidebar-label flex-1 text-left">Dashboard</span>
+            <span class="sidebar-label text-[10px] text-slate-500">⌘1</span>
+          </button>
+          <button data-nav="projects" class="nav-btn group w-full flex items-center gap-3 px-2.5 py-2 rounded-lg hover:bg-white/5 text-[14px]">
+            <i data-lucide="kanban-square" class="w-[18px] h-[18px] shrink-0 text-slate-400 group-[.active]:text-white"></i>
+            <span class="sidebar-label flex-1 text-left">Projects</span>
+            <span id="badge-projects" class="sidebar-label text-[11px] px-1.5 py-0.5 rounded-md bg-white/10 hidden">0</span>
+          </button>
+          <button data-nav="tasks" class="nav-btn group w-full flex items-center gap-3 px-2.5 py-2 rounded-lg hover:bg-white/5 text-[14px]">
+            <i data-lucide="list-checks" class="w-[18px] h-[18px] shrink-0 text-slate-400 group-[.active]:text-white"></i>
+            <span class="sidebar-label flex-1 text-left">Tasks</span>
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div class="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500 sidebar-label">Accounting</div>
+        <div class="space-y-0.5">
+          <button data-nav="quotations" class="nav-btn group w-full flex items-center gap-3 px-2.5 py-2 rounded-lg hover:bg-white/5 text-[14px]">
+            <i data-lucide="file-signature" class="w-[18px] h-[18px] shrink-0 text-slate-400 group-[.active]:text-white"></i>
+            <span class="sidebar-label flex-1 text-left">Quotations</span>
+          </button>
+          <button data-nav="invoices" class="nav-btn group w-full flex items-center gap-3 px-2.5 py-2 rounded-lg hover:bg-white/5 text-[14px]">
+            <i data-lucide="file-text" class="w-[18px] h-[18px] shrink-0 text-slate-400 group-[.active]:text-white"></i>
+            <span class="sidebar-label flex-1 text-left">Invoices</span>
+            <span id="badge-invoices" class="sidebar-label text-[11px] px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 hidden">0</span>
+          </button>
+          <button data-nav="bills" class="nav-btn group w-full flex items-center gap-3 px-2.5 py-2 rounded-lg hover:bg-white/5 text-[14px]">
+            <i data-lucide="file-input" class="w-[18px] h-[18px] shrink-0 text-slate-400 group-[.active]:text-white"></i>
+            <span class="sidebar-label flex-1 text-left">Bills (AP)</span>
+          </button>
+          <button data-nav="expenses" class="nav-btn group w-full flex items-center gap-3 px-2.5 py-2 rounded-lg hover:bg-white/5 text-[14px]">
+            <i data-lucide="receipt" class="w-[18px] h-[18px] shrink-0 text-slate-400 group-[.active]:text-white"></i>
+            <span class="sidebar-label flex-1 text-left">Expenses</span>
+          </button>
+          <button data-nav="banking" class="nav-btn group w-full flex items-center gap-3 px-2.5 py-2 rounded-lg hover:bg-white/5 text-[14px]">
+            <i data-lucide="landmark" class="w-[18px] h-[18px] shrink-0 text-slate-400 group-[.active]:text-white"></i>
+            <span class="sidebar-label flex-1 text-left">Banking</span>
+          </button>
+          <button data-nav="clients" class="nav-btn group w-full flex items-center gap-3 px-2.5 py-2 rounded-lg hover:bg-white/5 text-[14px]">
+            <i data-lucide="users" class="w-[18px] h-[18px] shrink-0 text-slate-400 group-[.active]:text-white"></i>
+            <span class="sidebar-label flex-1 text-left">Clients & Vendors</span>
+          </button>
+          <button data-nav="ledger" class="nav-btn group w-full flex items-center gap-3 px-2.5 py-2 rounded-lg hover:bg-white/5 text-[14px]">
+            <i data-lucide="book-open" class="w-[18px] h-[18px] shrink-0 text-slate-400 group-[.active]:text-white"></i>
+            <span class="sidebar-label flex-1 text-left">General Ledger</span>
+          </button>
+          <button data-nav="vat" class="nav-btn group w-full flex items-center gap-3 px-2.5 py-2 rounded-lg hover:bg-white/5 text-[14px]">
+            <i data-lucide="percent" class="w-[18px] h-[18px] shrink-0 text-slate-400 group-[.active]:text-white"></i>
+            <span class="sidebar-label flex-1 text-left">VAT Returns</span>
+          </button>
+          <button data-nav="accounts" class="nav-btn group w-full flex items-center gap-3 px-2.5 py-2 rounded-lg hover:bg-white/5 text-[14px]">
+            <i data-lucide="list-tree" class="w-[18px] h-[18px] shrink-0 text-slate-400 group-[.active]:text-white"></i>
+            <span class="sidebar-label flex-1 text-left">Chart of Accounts</span>
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div class="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500 flex items-center justify-between sidebar-label">
+          <span>Recent Projects</span>
+          <button class="hover:text-slate-300"><i data-lucide="plus" class="w-3 h-3"></i></button>
+        </div>
+        <div id="recentProjects" class="space-y-0.5 sidebar-label">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div>
+        <div class="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500 sidebar-label">Insights</div>
+        <div class="space-y-0.5">
+          <button data-nav="reports" class="nav-btn group w-full flex items-center gap-3 px-2.5 py-2 rounded-lg hover:bg-white/5 text-[14px]">
+            <i data-lucide="bar-chart-3" class="w-[18px] h-[18px] shrink-0 text-slate-400 group-[.active]:text-white"></i>
+            <span class="sidebar-label flex-1 text-left">Reports</span>
+          </button>
+          <button data-nav="profitability" class="nav-btn group w-full flex items-center gap-3 px-2.5 py-2 rounded-lg hover:bg-white/5 text-[14px]">
+            <i data-lucide="trending-up" class="w-[18px] h-[18px] shrink-0 text-slate-400 group-[.active]:text-white"></i>
+            <span class="sidebar-label flex-1 text-left">Profitability</span>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <div class="p-3 mt-auto border-t border-white/10 shrink-0">
+      <div class="flex items-center gap-2.5 p-2 rounded-xl hover:bg-white/5 cursor-pointer group" id="userMenu">
+        <img id="userAvatar" src="https://api.dicebear.com/7.x/initials/svg?seed=User" class="size-8 rounded-lg ring-1 ring-white/10">
+        <div class="flex-1 min-w-0 sidebar-label">
+          <div id="userName" class="text-[13px] font-medium leading-tight truncate">Loading...</div>
+          <div id="userEmail" class="text-[11px] text-slate-400 truncate">...</div>
+        </div>
+        <i data-lucide="chevron-up" class="w-3.5 h-3.5 text-slate-500 group-hover:text-slate-300 sidebar-label"></i>
+      </div>
+      <div class="flex items-center justify-between mt-2 sidebar-label">
+        <div class="flex items-center gap-1.5 text-[11px] text-slate-500">
+          <span class="size-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          Cloudflare D1
+        </div>
+        <button id="themeToggle" class="p-1.5 rounded-md hover:bg-white/10" title="Toggle theme">
+          <i data-lucide="moon" class="w-3.5 h-3.5 dark:hidden"></i>
+          <i data-lucide="sun" class="w-3.5 h-3.5 hidden dark:block"></i>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="flex-1 min-w-0 flex flex-col">
+    <header class="sticky top-0 z-20 bg-white/75 dark:bg-slate-950/70 backdrop-blur-xl border-b border-slate-200/70 dark:border-slate-800">
+      <div class="h-[68px] flex items-center gap-3 px-4 lg:px-8">
+        <button id="menuBtn" class="lg:hidden p-2 -ml-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800"><i data-lucide="menu" class="w-5 h-5"></i></button>
+        <div class="flex items-center gap-2 min-w-0">
+          <input id="companyName" class="bg-transparent font-semibold text-[18px] tracking-tight outline-none w-[170px] sm:w-[240px] truncate" value="Lumen Studio DXB">
+          <span class="hidden sm:inline-flex items-center gap-1 text-[11px] px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20">TRN 100123456700003</span>
+        </div>
+        <div class="hidden md:flex items-center flex-1 max-w-[520px] mx-4">
+          <div class="relative w-full">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input id="globalSearch" placeholder="Search projects, invoices, clients…" class="w-full h-10 pl-9 pr-3 rounded-xl bg-slate-100/80 dark:bg-slate-800/70 border border-slate-200/60 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500/30 text-sm">
+          </div>
+        <div class="flex items-center gap-2 ml-auto">
+          <button id="newBtn" class="inline-flex items-center gap-1.5 h-10 px-3.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 hover:opacity-90 text-sm font-medium shadow-soft"><i data-lucide="plus" class="w-4 h-4"></i><span class="hidden sm:inline">New</span></button>
+          <img src="https://api.dicebear.com/7.x/initials/svg?seed=LS" class="size-9 rounded-xl ring-1 ring-slate-200 dark:ring-slate-800" alt="">
+        </div>
+      </div>
+    </header>
+
+    <main class="px-4 lg:px-8 py-6 lg:py-8 max-w-[1400px] mx-auto w-full">
+      <!-- DASHBOARD -->
+      <section data-view="dashboard" class="space-y-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/70 dark:border-slate-800 shadow-sm">
+            <div class="flex items-center justify-between"><p class="text-sm text-slate-500">Total Revenue</p><i data-lucide="trending-up" class="w-4 h-4 text-emerald-500"></i></div>
+            <p id="kpiRevenue" class="text-[28px] font-semibold mt-2 tracking-tight">AED 0</p>
+            <p class="text-xs text-slate-500 mt-1">Paid invoices</p>
+          </div>
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/70 dark:border-slate-800 shadow-sm">
+            <div class="flex items-center justify-between"><p class="text-sm text-slate-500">Outstanding</p><i data-lucide="clock" class="w-4 h-4 text-amber-500"></i></div>
+            <p id="kpiOutstanding" class="text-[28px] font-semibold mt-2 tracking-tight">AED 0</p>
+            <p class="text-xs text-slate-500 mt-1">Sent & Overdue</p>
+          </div>
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/70 dark:border-slate-800 shadow-sm">
+            <div class="flex items-center justify-between"><p class="text-sm text-slate-500">Expenses MTD</p><i data-lucide="wallet" class="w-4 h-4 text-rose-500"></i></div>
+            <p id="kpiExpenses" class="text-[28px] font-semibold mt-2 tracking-tight">AED 0</p>
+            <p class="text-xs text-slate-500 mt-1">May 2024</p>
+          </div>
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/70 dark:border-slate-800 shadow-sm">
+            <div class="flex items-center justify-between"><p class="text-sm text-slate-500">Profit</p><i data-lucide="pie-chart" class="w-4 h-4 text-violet-500"></i></div>
+            <p id="kpiProfit" class="text-[28px] font-semibold mt-2 tracking-tight">AED 0</p>
+            <p class="text-xs text-emerald-600 dark:text-emerald-400 mt-1">Revenue - Expenses</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+          <div class="xl:col-span-2 bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/70 dark:border-slate-800 shadow-sm">
+            <div class="flex items-center justify-between mb-3"><h3 class="font-semibold">Revenue vs Expenses</h3><span class="text-xs px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Last 6 months</span></div>
+            <div class="h-[270px]"><canvas id="revExpChart"></canvas></div>
+          </div>
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/70 dark:border-slate-800 shadow-sm">
+            <h3 class="font-semibold mb-3">Projects by Status</h3>
+            <div class="h-[270px] flex items-center justify-center"><canvas id="projDonut"></canvas></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+          <div class="xl:col-span-2 bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/70 dark:border-slate-800 shadow-sm">
+            <div class="flex items-center justify-between mb-4"><h3 class="font-semibold">Recent Invoices</h3><button data-nav="invoices" class="text-xs text-violet-600 hover:underline">View all</button></div>
+            <div id="dashInvoices" class="overflow-x-auto -mx-2 px-2"></div>
+          </div>
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/70 dark:border-slate-800 shadow-sm">
+            <h3 class="font-semibold mb-4">Activity</h3>
+            <ul id="activityFeed" class="space-y-4"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROJECTS -->
+      <section data-view="projects" class="hidden space-y-4">
+        <div class="flex items-center justify-between">
+          <div><h2 class="text-xl font-semibold tracking-tight">Projects</h2><p class="text-sm text-slate-500">Kanban — drag to update status</p></div>
+          <button id="addProjectBtn" class="h-9 px-3 rounded-xl bg-violet-600 text-white text-sm font-medium hover:bg-violet-500 inline-flex items-center gap-1.5"><i data-lucide="plus" class="w-4 h-4"></i>Project</button>
+        </div>
+        <div id="kanban" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4"></div>
+      </section>
+
+      <!-- TASKS -->
+      <section data-view="tasks" class="hidden space-y-4">
+        <div class="flex items-center justify-between">
+          <div><h2 class="text-xl font-semibold tracking-tight">Tasks</h2><p class="text-sm text-slate-500">Linked to projects • hours • billable</p></div>
+          <button id="addTaskBtn" class="h-9 px-3 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-sm font-medium inline-flex items-center gap-1.5"><i data-lucide="plus" class="w-4 h-4"></i>Task</button>
+        </div>
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto"><table class="w-full text-sm">
+            <thead class="bg-slate-50 dark:bg-slate-800/50 text-slate-500"><tr class="text-left">
+              <th class="px-4 py-3 font-medium">Task</th><th class="px-4 py-3 font-medium">Project</th><th class="px-4 py-3 font-medium">Assignee</th>
+              <th class="px-4 py-3 font-medium">Due</th><th class="px-4 py-3 font-medium">Priority</th><th class="px-4 py-3 font-medium">Hours</th><th class="px-4 py-3 font-medium">Billable</th><th class="px-4 py-3"></th>
+            </tr></thead>
+            <tbody id="tasksTbody" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- CLIENTS -->
+      <section data-view="clients" class="hidden space-y-4">
+        <div class="flex items-center justify-between">
+          <div><h2 class="text-xl font-semibold tracking-tight">Customers & Suppliers</h2><p class="text-sm text-slate-500">Debtors and creditors management</p></div>
+          <div class="flex gap-2">
+            <button id="addClientBtn" class="h-9 px-3 rounded-xl bg-violet-600 text-white text-sm inline-flex items-center gap-1.5"><i data-lucide="user-plus" class="w-4 h-4"></i>Customer</button>
+            <button onclick="openSupplier()" class="h-9 px-3 rounded-xl border text-sm inline-flex items-center gap-1.5"><i data-lucide="building" class="w-4 h-4"></i>Supplier</button>
+          </div>
+        </div>
+        
+        <div class="flex gap-2 border-b border-slate-200 dark:border-slate-800">
+          <button data-tab="debtors" class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-violet-600">Debtors (Customers)</button>
+          <button data-tab="creditors" class="tab-btn px-4 py-2 text-sm font-medium border-b-2 border-transparent text-slate-500">Creditors (Suppliers)</button>
+        </div>
+
+        <div id="debtorsTab">
+          <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-4">
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border"><div class="text-xs text-slate-500">Total Receivables</div><div id="totalAR" class="text-2xl font-semibold mt-1">AED 0</div></div>
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border"><div class="text-xs text-slate-500">0-30 days</div><div id="ar30" class="text-2xl font-semibold mt-1 text-emerald-600">AED 0</div></div>
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border"><div class="text-xs text-slate-500">31-60 days</div><div id="ar60" class="text-2xl font-semibold mt-1 text-amber-600">AED 0</div></div>
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border"><div class="text-xs text-slate-500">90+ days</div><div id="ar90" class="text-2xl font-semibold mt-1 text-rose-600">AED 0</div></div>
+          </div>
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border overflow-hidden">
+            <table class="w-full text-sm"><thead class="bg-slate-50 dark:bg-slate-800/50"><tr class="text-left"><th class="px-4 py-2">Customer</th><th class="px-4 py-2">Terms</th><th class="px-4 py-2">Credit Limit</th><th class="px-4 py-2 text-right">Total Due</th><th class="px-4 py-2 text-right">0-30</th><th class="px-4 py-2 text-right">31-60</th><th class="px-4 py-2 text-right">61-90</th><th class="px-4 py-2 text-right">90+</th><th></th></tr></thead><tbody id="debtorsTbody"></tbody></table>
+          </div>
+        </div>
+
+        <div id="creditorsTab" class="hidden">
+          <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-4">
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border"><div class="text-xs text-slate-500">Total Payables</div><div id="totalAP" class="text-2xl font-semibold mt-1">AED 0</div></div>
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border"><div class="text-xs text-slate-500">0-30 days</div><div id="ap30" class="text-2xl font-semibold mt-1">AED 0</div></div>
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border"><div class="text-xs text-slate-500">Due Soon</div><div id="apDue" class="text-2xl font-semibold mt-1 text-amber-600">0</div></div>
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border"><div class="text-xs text-slate-500">Suppliers</div><div id="supplierCount" class="text-2xl font-semibold mt-1">0</div></div>
+          </div>
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border overflow-hidden">
+            <table class="w-full text-sm"><thead class="bg-slate-50 dark:bg-slate-800/50"><tr class="text-left"><th class="px-4 py-2">Supplier</th><th class="px-4 py-2">Terms</th><th class="px-4 py-2 text-right">Total Due</th><th class="px-4 py-2 text-right">0-30</th><th class="px-4 py-2 text-right">31-60</th><th class="px-4 py-2 text-right">90+</th><th></th></tr></thead><tbody id="creditorsTbody"></tbody></table>
+          </div>
+        </div>
+
+        <div id="clientsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-6"></div>
+      </section>
+
+      <!-- INVOICES -->
+      <section data-view="invoices" class="hidden space-y-4">
+        <div class="flex items-center justify-between">
+          <div><h2 class="text-xl font-semibold tracking-tight">Invoices</h2><p class="text-sm text-slate-500">VAT 5% UAE • PDF export</p></div>
+          <div class="flex items-center gap-2">
+            <div class="text-xs">VAT <input id="vatRate" type="number" class="w-14 ml-1 px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700" value="5"> %</div>
+            <button id="addInvoiceBtn" class="h-9 px-3 rounded-xl bg-violet-600 text-white text-sm font-medium hover:bg-violet-500 inline-flex items-center gap-1.5"><i data-lucide="plus" class="w-4 h-4"></i>Invoice</button>
+          </div>
+        </div>
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto"><table class="w-full text-sm">
+            <thead class="bg-slate-50 dark:bg-slate-800/50 text-slate-500"><tr class="text-left">
+              <th class="px-4 py-3 font-medium">Number</th><th class="px-4 py-3 font-medium">Client</th><th class="px-4 py-3 font-medium">Date</th><th class="px-4 py-3 font-medium">Due</th><th class="px-4 py-3 font-medium">Total</th><th class="px-4 py-3 font-medium">Status</th><th class="px-4 py-3"></th>
+            </tr></thead>
+            <tbody id="invoicesTbody" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- EXPENSES -->
+      <section data-view="expenses" class="hidden space-y-4">
+        <div class="flex items-center justify-between">
+          <div><h2 class="text-xl font-semibold tracking-tight">Expenses</h2><p class="text-sm text-slate-500">Track costs by project</p></div>
+          <div class="flex items-center gap-2">
+            <select id="expenseMonth" class="h-9 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm"></select>
+            <button id="addExpenseBtn" class="h-9 px-3 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-sm font-medium inline-flex items-center gap-1.5"><i data-lucide="plus" class="w-4 h-4"></i>Expense</button>
+          </div>
+        </div>
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto"><table class="w-full text-sm">
+            <thead class="bg-slate-50 dark:bg-slate-800/50 text-slate-500"><tr class="text-left">
+              <th class="px-4 py-3 font-medium">Date</th><th class="px-4 py-3 font-medium">Category</th><th class="px-4 py-3 font-medium">Description</th><th class="px-4 py-3 font-medium">Project</th><th class="px-4 py-3 font-medium">Amount</th><th class="px-4 py-3"></th>
+            </tr></thead>
+            <tbody id="expensesTbody" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- REPORTS -->
+      <section data-view="reports" class="hidden space-y-4">
+        <div><h2 class="text-xl font-semibold tracking-tight">Reports</h2><p class="text-sm text-slate-500">P&L summary & project profitability</p></div>
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+          <div class="xl:col-span-2 bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/70 dark:border-slate-800 shadow-sm">
+            <h3 class="font-semibold mb-3">P&L — Last 6 Months</h3>
+            <div class="h-[260px]"><canvas id="plChart"></canvas></div>
+          </div>
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/70 dark:border-slate-800 shadow-sm">
+            <h3 class="font-semibold mb-3">Project Profitability</h3>
+            <div id="profitTable" class="text-sm space-y-2"></div>
+          </div>
+        </div>
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/70 dark:border-slate-800 shadow-sm overflow-hidden">
+          <h3 class="font-semibold mb-3">Monthly Breakdown</h3>
+          <div class="overflow-x-auto"><table class="w-full text-sm">
+            <thead class="text-slate-500"><tr class="text-left border-b border-slate-200 dark:border-slate-800"><th class="py-2 pr-4">Month</th><th class="py-2 pr-4">Income</th><th class="py-2 pr-4">Expenses</th><th class="py-2 pr-4">Profit</th><th class="py-2 pr-4">Margin</th></tr></thead>
+            <tbody id="plTbody" class="divide-y divide-slate-100 dark:divide-slate-800"></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- QUOTATIONS -->
+      <section data-view="quotations" class="hidden space-y-4">
+        <div class="flex items-center justify-between">
+          <div><h2 class="text-xl font-semibold">Quotations</h2><p class="text-sm text-slate-500">Create quotes, convert to invoices</p></div>
+          <button onclick="openQuotation()" class="h-9 px-3 rounded-xl bg-violet-600 text-white text-sm">New Quotation</button>
+        </div>
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/70 dark:border-slate-800 overflow-hidden">
+          <table class="w-full text-sm"><thead class="bg-slate-50 dark:bg-slate-800/50"><tr class="text-left"><th class="px-4 py-2">Number</th><th class="px-4 py-2">Client</th><th class="px-4 py-2">Date</th><th class="px-4 py-2">Total</th><th class="px-4 py-2">Status</th><th></th></tr></thead><tbody id="quotationsTbody"></tbody></table>
+        </div>
+      </section>
+
+      <!-- BILLS -->
+      <section data-view="bills" class="hidden space-y-4">
+        <div class="flex items-center justify-between">
+          <div><h2 class="text-xl font-semibold">Bills (Accounts Payable)</h2><p class="text-sm text-slate-500">Vendor bills and payments</p></div>
+          <button onclick="openBill()" class="h-9 px-3 rounded-xl bg-violet-600 text-white text-sm">New Bill</button>
+        </div>
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border overflow-hidden"><table class="w-full text-sm"><thead class="bg-slate-50 dark:bg-slate-800/50"><tr><th class="px-4 py-2 text-left">Bill</th><th class="px-4 py-2 text-left">Vendor</th><th class="px-4 py-2 text-left">Due</th><th class="px-4 py-2 text-left">Total</th><th class="px-4 py-2 text-left">Status</th></tr></thead><tbody id="billsTbody"></tbody></table></div>
+      </section>
+
+      <!-- BANKING -->
+      <section data-view="banking" class="hidden space-y-4">
+        <div><h2 class="text-xl font-semibold">Banking & Reconciliation</h2><p class="text-sm text-slate-500">ENBD • AED 150,000 opening</p></div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-2xl p-5 border"><h3 class="font-semibold mb-3">Unreconciled Transactions</h3><div id="bankList" class="text-sm space-y-2"></div></div>
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border"><h3 class="font-semibold mb-3">Reconcile</h3><p class="text-xs text-slate-500">Match bank lines to journal entries automatically via API</p><button onclick="alert('Connect to /api/banking/reconcile')" class="mt-3 w-full h-9 rounded-xl bg-emerald-600 text-white text-sm">Run Auto-Match</button></div>
+        </div>
+      </section>
+
+      <!-- VAT -->
+      <section data-view="vat" class="hidden space-y-4">
+        <div><h2 class="text-xl font-semibold">UAE VAT Returns</h2><p class="text-sm text-slate-500">FTA compliant 5% VAT</p></div>
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border">
+          <div class="flex gap-3 mb-4"><input type="date" id="vatStart" value="2026-01-01" class="px-3 h-9 rounded-lg border bg-transparent text-sm"><input type="date" id="vatEnd" value="2026-03-31" class="px-3 h-9 rounded-lg border bg-transparent text-sm"><button onclick="loadVAT()" class="h-9 px-3 rounded-lg bg-slate-900 text-white text-sm">Calculate</button></div>
+          <div id="vatResult" class="grid grid-cols-3 gap-4 text-center"></div>
+        </div>
+      </section>
+
+      <!-- CHART OF ACCOUNTS -->
+      <section data-view="accounts" class="hidden space-y-4">
+        <div><h2 class="text-xl font-semibold">Chart of Accounts</h2><p class="text-sm text-slate-500">Double-entry structure</p></div>
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border overflow-hidden"><table class="w-full text-sm"><thead class="bg-slate-50 dark:bg-slate-800/50"><tr><th class="px-4 py-2 text-left">Code</th><th class="px-4 py-2 text-left">Name</th><th class="px-4 py-2 text-left">Type</th><th class="px-4 py-2 text-right">Balance</th></tr></thead><tbody id="coaTbody"></tbody></table></div>
+      </section>
+
+      <!-- PROJECT BUILD-UP -->
+      <section data-view="profitability" class="hidden space-y-4">
+        <div class="flex items-center justify-between">
+          <div><h2 class="text-xl font-semibold">Project Build-Up & Teardown</h2><p class="text-sm text-slate-500">Estimates, budgets, closeout</p></div>
+          <div class="flex gap-2"><button onclick="openEstimate()" class="h-9 px-3 rounded-xl border text-sm">New Estimate</button><button onclick="closeoutProject()" class="h-9 px-3 rounded-xl bg-rose-600 text-white text-sm">Teardown Project</button></div>
+        </div>
+        <div id="buildupView" class="grid grid-cols-1 xl:grid-cols-2 gap-4"></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- MODALS -->
+<dialog id="modal" class="w-[95vw] max-w-[760px] rounded-2xl p-0 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 shadow-2xl">
+  <form id="modalForm" method="dialog" class="flex flex-col max-h-[85vh]">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
+      <h3 id="modalTitle" class="font-semibold text-lg"></h3>
+      <button type="button" id="modalClose" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"><i data-lucide="x" class="w-5 h-5"></i></button>
+    </div>
+    <div id="modalBody" class="p-5 overflow-y-auto scrollbar-thin"></div>
+    <div class="px-5 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-2">
+      <button type="button" id="modalCancel" class="h-9 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 hover:opacity-90 text-sm">Cancel</button>
+      <button id="modalSave" class="h-9 px-4 rounded-xl bg-violet-600 text-white hover:bg-violet-500 text-sm font-medium">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+(() => {
+  const SAMPLE = {
+    companyName: "Lumen Studio DXB",
+    vatRate: 5,
+    clients: [
+      {id:'c1', name:'Ahmed Al Mansoori', email:'ahmed@emaar.ae', company:'Emaar Properties', phone:'+971 50 123 4567', trn:'100123456700003', balance:13125},
+      {id:'c2', name:'Lina Khatri', email:'lina.k@noon.com', company:'Noon.com', phone:'+971 55 234 5678', trn:'100987654300003', balance:12600},
+      {id:'c3', name:'Omar Farouk', email:'omar.f@chalhoub.com', company:'Chalhoub Group', phone:'+971 4 567 8901', trn:'100456789100003', balance:5250},
+    ],
+    projects: [
+      {id:'p1', name:'Emaar Digital Dashboard', clientId:'c1', budget:45000, spent:18750, deadline:'2024-08-15', status:'In Progress', description:'Analytics dashboard for retail leasing KPIs'},
+      {id:'p2', name:'Noon Vendor Portal UX', clientId:'c2', budget:32000, spent:8000, deadline:'2024-07-30', status:'Review', description:'Redesign seller onboarding'},
+      {id:'p3', name:'Chalhoub CRM Integration', clientId:'c3', budget:28000, spent:0, deadline:'2024-09-10', status:'Backlog', description:'Salesforce to DWH pipeline'},
+    ],
+    tasks: [
+      {id:'t1', projectId:'p1', title:'Wireframe KPI modules', assignee:'You', due:'2024-06-10', priority:'High', hours:12, billable:true, status:'Done'},
+      {id:'t2', projectId:'p1', title:'API integration - leasing data', assignee:'You', due:'2024-06-18', priority:'High', hours:18, billable:true, status:'In Progress'},
+      {id:'t3', projectId:'p1', title:'Design system handoff', assignee:'Aisha', due:'2024-06-22', priority:'Medium', hours:8, billable:true, status:'In Progress'},
+      {id:'t4', projectId:'p2', title:'Vendor research interviews', assignee:'You', due:'2024-06-05', priority:'Medium', hours:10, billable:true, status:'Done'},
+      {id:'t5', projectId:'p2', title:'Prototyping onboarding flow', assignee:'You', due:'2024-06-14', priority:'High', hours:14, billable:true, status:'Review'},
+      {id:'t6', projectId:'p2', title:'Usability testing', assignee:'Lina', due:'2024-06-20', priority:'Medium', hours:6, billable:false, status:'Backlog'},
+      {id:'t7', projectId:'p3', title:'CRM data mapping', assignee:'You', due:'2024-07-01', priority:'Low', hours:5, billable:true, status:'Backlog'},
+      {id:'t8', projectId:'p3', title:'Security review', assignee:'Omar', due:'2024-07-10', priority:'Medium', hours:4, billable:false, status:'Backlog'},
+    ],
+    invoices: [
+      {id:'i1', number:'INV-2024-001', clientId:'c1', projectId:'p1', date:'2024-04-15', due:'2024-05-15', status:'Paid', vat:5, items:[{desc:'Discovery & Wireframes', qty:1, rate:12500}]},
+      {id:'i2', number:'INV-2024-002', clientId:'c2', projectId:'p2', date:'2024-05-01', due:'2024-05-31', status:'Sent', vat:5, items:[{desc:'UX Research Sprint', qty:40, rate:300}]},
+      {id:'i3', number:'INV-2024-003', clientId:'c1', projectId:'p1', date:'2024-05-20', due:'2024-06-19', status:'Sent', vat:5, items:[{desc:'Dev Sprint 1', qty:60, rate:312.5}]},
+      {id:'i4', number:'INV-2024-004', clientId:'c3', projectId:'p3', date:'2024-03-10', due:'2024-04-09', status:'Overdue', vat:5, items:[{desc:'Kickoff & Architecture', qty:1, rate:5000}]},
+    ],
+    expenses: [
+      {id:'e1', date:'2024-05-03', category:'Software', description:'Figma Professional', amount:450, projectId:'p1', receipt:'Monthly'},
+      {id:'e2', date:'2024-05-11', category:'Office', description:'WeWork Day Pass - DIFC', amount:220, projectId:'', receipt:''},
+      {id:'e3', date:'2024-04-28', category:'Travel', description:'Careem to Emaar HQ', amount:85, projectId:'p1', receipt:''},
+      {id:'e4', date:'2024-05-15', category:'Marketing', description:'LinkedIn Ads', amount:1200, projectId:'', receipt:''},
+      {id:'e5', date:'2024-04-10', category:'Software', description:'ChatGPT Plus', amount:75, projectId:'', receipt:''},
+      {id:'e6', date:'2024-03-22', category:'Hardware', description:'Logitech MX Keys', amount:549, projectId:'', receipt:'Noon'},
+    ],
+    activity: [
+      {time:'Today 10:42', text:'Invoice INV-2024-003 sent to Emaar Properties', icon:'send'},
+      {time:'Yesterday', text:'Task "API integration" moved to In Progress', icon:'kanban-square'},
+      {time:'2 days ago', text:'Expense AED 1,200 logged for Marketing', icon:'receipt'},
+      {time:'3 days ago', text:'Project "Noon Vendor Portal" moved to Review', icon:'git-pull-request'},
+      {time:'4 days ago', text:'Client Noon.com updated details', icon:'user-check'},
+    ]
+  };
+
+  const USE_API = location.hostname.includes('pages.dev') || location.hostname.includes('workers.dev') || !['localhost','127.0.0.1'].includes(location.hostname);
+  const API = (p, opts) => fetch('/api/'+p, opts).then(r=>r.json());
+
+  let state = JSON.parse(localStorage.getItem('flowbooks_v1') || 'null') || structuredClone(SAMPLE);
+  // In production, load from D1
+  if(USE_API){ API('bootstrap').catch(()=>{}).then(d=>{ if(d) Object.assign(state, d); }); }
+  let charts = {};
+  let currentView = 'dashboard';
+  let searchQuery = '';
+
+  const $ = s => document.querySelector(s);
+  const $$ = s => document.querySelectorAll(s);
+  const fmt = n => 'AED ' + Number(n||0).toLocaleString('en-AE', {maximumFractionDigits:0});
+  const fmt2 = n => 'AED ' + Number(n||0).toLocaleString('en-AE', {minimumFractionDigits:2, maximumFractionDigits:2});
+  const byId = (arr,id) => arr.find(x=>x.id===id);
+  const uid = (p='id') => p+'_'+Math.random().toString(36).slice(2,8);
+  const save = () => { localStorage.setItem('flowbooks_v1', JSON.stringify(state)); /* TODO: POST /api/save */ };
+
+  function setTheme(dark){ document.documentElement.classList.toggle('dark', dark); localStorage.setItem('fb_theme', dark?'1':'0'); }
+  setTheme(localStorage.getItem('fb_theme')==='1');
+
+  // NAV
+  function navigate(view){
+    currentView = view;
+    $$('[data-view]').forEach(s=>s.classList.toggle('hidden', s.dataset.view!==view));
+    $$('.nav-btn').forEach(b=>{ const active=b.dataset.nav===view; b.classList.toggle('bg-white/10',active); b.classList.toggle('text-white',active); });
+    $('#sidebar').classList.add('-translate-x-full'); $('#backdrop').classList.add('hidden');
+    render();
+  }
+  $$('.nav-btn').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.nav)));
+  $('[data-nav="invoices"]').addEventListener('click',()=>navigate('invoices'));
+
+  // MOBILE
+  $('#menuBtn').onclick = ()=>{ $('#sidebar').classList.toggle('-translate-x-full'); $('#backdrop').classList.toggle('hidden'); };
+  $('#backdrop').onclick = ()=>{ $('#sidebar').classList.add('-translate-x-full'); $('#backdrop').classList.add('hidden'); };
+
+  // THEME
+  $('#themeToggle').onclick = ()=> setTheme(!document.documentElement.classList.contains('dark'));
+
+  // SEARCH
+  $('#globalSearch').addEventListener('input', e=>{ searchQuery = e.target.value.toLowerCase(); render(); });
+
+  // COMPANY NAME
+  const companyInput = $('#companyName');
+  companyInput.value = state.companyName;
+  companyInput.addEventListener('change', ()=>{ state.companyName = companyInput.value; save(); });
+
+  // NEW BUTTON
+  $('#newBtn').onclick = () => {
+    const map = {dashboard:'invoices', projects:'projects', tasks:'tasks', clients:'clients', invoices:'invoices', expenses:'expenses', reports:'invoices'};
+    const v = map[currentView]||'invoices';
+    if(v==='projects') openProject();
+    if(v==='tasks') openTask();
+    if(v==='clients') openClient();
+    if(v==='invoices') openInvoice();
+    if(v==='expenses') openExpense();
+  };
+
+  // VAT
+  $('#vatRate').value = state.vatRate;
+  $('#vatRate').addEventListener('change', e=>{ state.vatRate = Number(e.target.value)||5; save(); render(); });
+
+  // RENDER CORE
+  function calcInvoiceTotal(inv){ const sub = inv.items.reduce((s,i)=>s+i.qty*i.rate,0); const vat = sub * (inv.vat||state.vatRate)/100; return {sub, vat, total:sub+vat}; }
+
+  function render(){
+    // KPIs
+    const paid = state.invoices.filter(i=>i.status==='Paid').reduce((s,i)=>s+calcInvoiceTotal(i).total,0);
+    const outstanding = state.invoices.filter(i=>i.status!=='Paid').reduce((s,i)=>s+calcInvoiceTotal(i).total,0);
+    const mtd = state.expenses.filter(e=>e.date.startsWith('2024-05')).reduce((s,e)=>s+e.amount,0);
+    $('#kpiRevenue').textContent = fmt(paid);
+    $('#kpiOutstanding').textContent = fmt(outstanding);
+    $('#kpiExpenses').textContent = fmt(mtd);
+    $('#kpiProfit').textContent = fmt(paid - mtd);
+
+    renderDashboardLists();
+    if(currentView==='dashboard') renderCharts();
+    if(currentView==='projects') renderProjects();
+    if(currentView==='tasks') renderTasks();
+    if(currentView==='clients') renderClients();
+    if(currentView==='invoices') renderInvoices();
+    if(currentView==='expenses') renderExpenses();
+    if(currentView==='reports') renderReports();
+
+    lucide.createIcons();
+  }
+
+  function renderDashboardLists(){
+    // recent invoices
+    const rows = state.invoices.slice(0,5).map(inv=>{
+      const c = byId(state.clients, inv.clientId); const t = calcInvoiceTotal(inv);
+      return `<div class="flex items-center justify-between py-3 border-b last:border-0 border-slate-100 dark:border-slate-800">
+        <div class="flex items-center gap-3 min-w-0"><div class="size-9 grid place-items-center rounded-xl bg-slate-100 dark:bg-slate-800"><i data-lucide="file-text" class="w-4 h-4"></i></div>
+        <div class="min-w-0"><div class="font-medium truncate">${inv.number} • ${c?.company||''}</div><div class="text-xs text-slate-500">${inv.date}</div></div></div>
+        <div class="text-right"><div class="font-medium">${fmt2(t.total)}</div><div class="text-[11px] ${inv.status==='Paid'?'text-emerald-600':inv.status==='Overdue'?'text-rose-600':'text-amber-600'}">${inv.status}</div></div>
+      </div>`;
+    }).join('');
+    $('#dashInvoices').innerHTML = rows;
+
+    // activity
+    $('#activityFeed').innerHTML = state.activity.map(a=>`
+      <li class="flex gap-3"><div class="mt-0.5 size-7 grid place-items-center rounded-lg bg-slate-100 dark:bg-slate-800"><i data-lucide="${a.icon}" class="w-4 h-4 text-slate-500"></i></div>
+      <div><div class="text-sm leading-snug">${a.text}</div><div class="text-[11px] text-slate-500">${a.time}</div></div></li>`).join('');
+  }
+
+  function renderCharts(){
+    const labels = ['Dec 23','Jan 24','Feb 24','Mar 24','Apr 24','May 24'];
+    const income = [0,0,0,5250,13125,0]; // from sample paid in Apr
+    const expenses = [0,0,549,75,160,1870];
+    const ctx1 = $('#revExpChart');
+    if(charts.rev) charts.rev.destroy();
+    charts.rev = new Chart(ctx1, {
+      type:'line',
+      data:{labels, datasets:[
+        {label:'Revenue', data:income, tension:.35, borderWidth:2, pointRadius:0, borderColor:'#7c3aed', backgroundColor:'rgba(124,58,237,.15)', fill:true},
+        {label:'Expenses', data:expenses, tension:.35, borderWidth:2, pointRadius:0, borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,.12)', fill:true},
+      ]},
+      options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:true,labels:{boxWidth:10}}}, scales:{y:{beginAtZero:true, ticks:{callback:v=>'AED '+v}}, x:{grid:{display:false}}}}
+    });
+
+    const statusCounts = ['Backlog','In Progress','Review','Done'].map(s=>state.projects.filter(p=>p.status===s).length);
+    const ctx2 = $('#projDonut');
+    if(charts.donut) charts.donut.destroy();
+    charts.donut = new Chart(ctx2, {
+      type:'doughnut',
+      data:{labels:['Backlog','In Progress','Review','Done'], datasets:[{data:statusCounts, borderWidth:0, backgroundColor:['#64748b','#7c3aed','#f59e0b','#10b981']}]},
+      options:{cutout:'68%', plugins:{legend:{position:'bottom', labels:{boxWidth:10}}}}
+    });
+  }
+
+  // PROJECTS KANBAN
+  function renderProjects(){
+    const cols = [
+      {id:'Backlog', title:'Backlog', color:'slate'},
+      {id:'In Progress', title:'In Progress', color:'violet'},
+      {id:'Review', title:'Review', color:'amber'},
+      {id:'Done', title:'Done', color:'emerald'},
+    ];
+    $('#kanban').innerHTML = cols.map(c=>{
+      const items = state.projects.filter(p=>p.status===c.id && (!searchQuery || p.name.toLowerCase().includes(searchQuery) || byId(state.clients,p.clientId)?.company.toLowerCase().includes(searchQuery)));
+      return `<div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-3 border border-slate-200/60 dark:border-slate-800">
+        <div class="flex items-center justify-between px-1 pb-2"><h4 class="text-sm font-semibold">${c.title}</h4><span class="text-[11px] px-2 py-0.5 rounded-full bg-${c.color}-500/10 text-${c.color}-700 dark:text-${c.color}-300 border border-${c.color}-500/20">${items.length}</span></div>
+        <div class="kanban-col min-h-[200px] space-y-3" data-status="${c.id}">
+          ${items.map(p=>{
+            const client = byId(state.clients,p.clientId); const progress = Math.min(100, Math.round((p.spent||0)/p.budget*100));
+            return `<div draggable="true" data-id="${p.id}" class="project-card bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm cursor-grab active:cursor-grabbing">
+              <div class="flex items-start justify-between gap-2"><div><div class="font-medium leading-tight">${p.name}</div><div class="text-xs text-slate-500">${client?.company||''}</div></div>
+                <button class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800" onclick="editProject('${p.id}')"><i data-lucide="pencil" class="w-3.5 h-3.5"></i></button>
+              </div>
+              <p class="text-xs text-slate-600 dark:text-slate-400 mt-2 line-clamp-2">${p.description||''}</p>
+              <div class="mt-3"><div class="flex justify-between text-[11px] mb-1"><span>Budget</span><span>${fmt(p.spent||0)} / ${fmt(p.budget)}</span></div><div class="h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden"><div class="h-full bg-violet-500" style="width:${progress}%"></div></div></div>
+              <div class="flex items-center justify-between mt-3 text-[11px] text-slate-500"><span>Due ${new Date(p.deadline).toLocaleDateString('en-GB',{day:'2-digit',month:'short'})}</span><span class="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800">${p.status}</span></div>
+            </div>`;
+          }).join('')}
+          <button class="w-full h-9 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 text-xs hover:bg-white dark:hover:bg-slate-800" onclick="openProject(null,'${c.id}')">+ Add project</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    $$('.project-card').forEach(card=>{
+      card.addEventListener('dragstart', e=>{ e.dataTransfer.setData('text/plain', card.dataset.id); setTimeout(()=>card.classList.add('opacity-50'),0); });
+      card.addEventListener('dragend', ()=>card.classList.remove('opacity-50'));
+    });
+    $$('.kanban-col').forEach(col=>{
+      col.addEventListener('dragover', e=>{ e.preventDefault(); col.classList.add('ring-2','ring-violet-500/30'); });
+      col.addEventListener('dragleave', ()=> col.classList.remove('ring-2','ring-violet-500/30'));
+      col.addEventListener('drop', e=>{ e.preventDefault(); col.classList.remove('ring-2','ring-violet-500/30'); const id=e.dataTransfer.getData('text/plain'); const p=byId(state.projects,id); if(p){ p.status = col.dataset.status; save(); addActivity(`Project "${p.name}" moved to ${p.status}`,'kanban-square'); renderProjects(); }});
+    });
+    lucide.createIcons();
+  }
+  window.editProject = (id)=> openProject(byId(state.projects,id));
+
+  // TASKS
+  function renderTasks(){
+    const q = searchQuery;
+    const rows = state.tasks.filter(t=>!q || t.title.toLowerCase().includes(q)).map(t=>{
+      const p = byId(state.projects, t.projectId);
+      return `<tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
+        <td class="px-4 py-3"><input value="${t.title}" class="bg-transparent outline-none w-full" onchange="updateTask('${t.id}','title',this.value)"></td>
+        <td class="px-4 py-3"><select class="bg-transparent outline-none" onchange="updateTask('${t.id}','projectId',this.value)">${state.projects.map(pr=>`<option value="${pr.id}" ${pr.id===t.projectId?'selected':''}>${pr.name}</option>`).join('')}</select></td>
+        <td class="px-4 py-3"><input value="${t.assignee}" class="bg-transparent outline-none w-24" onchange="updateTask('${t.id}','assignee',this.value)"></td>
+        <td class="px-4 py-3"><input type="date" value="${t.due}" class="bg-transparent outline-none" onchange="updateTask('${t.id}','due',this.value)"></td>
+        <td class="px-4 py-3"><span class="px-2 py-1 rounded-lg text-[11px] border ${t.priority==='High'?'bg-rose-500/10 text-rose-700 border-rose-500/20':t.priority==='Medium'?'bg-amber-500/10 text-amber-700 border-amber-500/20':'bg-slate-500/10 text-slate-600 border-slate-500/20'}">${t.priority}</span></td>
+        <td class="px-4 py-3 w-24"><input type="number" value="${t.hours}" class="w-16 bg-slate-100 dark:bg-slate-800 rounded-lg px-2 py-1 outline-none" onchange="updateTask('${t.id}','hours',Number(this.value))"></td>
+        <td class="px-4 py-3"><label class="inline-flex items-center cursor-pointer"><input type="checkbox" ${t.billable?'checked':''} onchange="updateTask('${t.id}','billable',this.checked)" class="sr-only peer"><div class="w-9 h-5 bg-slate-300 dark:bg-slate-700 rounded-full peer-checked:bg-violet-600 relative after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-4 after:h-4 after:bg-white after:rounded-full after:transition-all peer-checked:after:translate-x-4"></div></label></td>
+        <td class="px-4 py-3 text-right"><button class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800" onclick="deleteTask('${t.id}')"><i data-lucide="trash-2" class="w-4 h-4 text-slate-500"></i></button></td>
+      </tr>`;
+    }).join('');
+    $('#tasksTbody').innerHTML = rows || `<tr><td colspan="8" class="px-4 py-10 text-center text-slate-500">No tasks</td></tr>`;
+    lucide.createIcons();
+  }
+  window.updateTask = (id,k,v)=>{ const t=byId(state.tasks,id); t[k]=v; save(); if(k==='hours'||k==='billable') addActivity(`Task "${t.title}" updated`,'list-checks'); };
+  window.deleteTask = (id)=>{ if(confirm('Delete task?')){ state.tasks = state.tasks.filter(t=>t.id!==id); save(); renderTasks(); } };
+
+  // CLIENTS
+  function renderClients(){
+    const q = searchQuery;
+    const items = state.clients.filter(c=>!q || c.company.toLowerCase().includes(q) || c.name.toLowerCase().includes(q));
+    $('#clientsGrid').innerHTML = items.map(c=>`
+      <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/70 dark:border-slate-800 shadow-sm">
+        <div class="flex items-start justify-between"><div class="flex items-center gap-3"><div class="size-10 rounded-xl bg-violet-500/10 text-violet-700 dark:text-violet-300 grid place-items-center font-semibold">${c.company.split(' ').map(w=>w[0]).slice(0,2).join('')}</div><div><div class="font-semibold leading-tight">${c.company}</div><div class="text-xs text-slate-500">${c.name}</div></div></div>
+          <button class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800" onclick="openClient('${c.id}')"><i data-lucide="pencil" class="w-4 h-4"></i></button>
+        </div>
+        <div class="mt-4 space-y-1.5 text-sm"><div class="flex items-center gap-2 text-slate-600 dark:text-slate-300"><i data-lucide="mail" class="w-4 h-4"></i>${c.email}</div><div class="flex items-center gap-2 text-slate-600 dark:text-slate-300"><i data-lucide="phone" class="w-4 h-4"></i>${c.phone}</div><div class="flex items-center gap-2 text-slate-600 dark:text-slate-300"><i data-lucide="hash" class="w-4 h-4"></i>TRN ${c.trn}</div></div>
+        <div class="mt-4 flex items-center justify-between"><span class="text-xs text-slate-500">Balance</span><span class="font-semibold">${fmt(c.balance||0)}</span></div>
+      </div>`).join('');
+    lucide.createIcons();
+  }
+  window.openClient = (id)=>{}; // replaced below
+
+  // INVOICES
+  function renderInvoices(){
+    const q = searchQuery;
+    const rows = state.invoices.filter(i=>!q || i.number.toLowerCase().includes(q) || byId(state.clients,i.clientId)?.company.toLowerCase().includes(q)).map(inv=>{
+      const c = byId(state.clients, inv.clientId); const t = calcInvoiceTotal(inv);
+      const badge = inv.status==='Paid'?'bg-emerald-500/10 text-emerald-700 border-emerald-500/20':inv.status==='Overdue'?'bg-rose-500/10 text-rose-700 border-rose-500/20':'bg-amber-500/10 text-amber-700 border-amber-500/20';
+      return `<tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
+        <td class="px-4 py-3 font-medium">${inv.number}</td>
+        <td class="px-4 py-3">${c?.company||''}</td>
+        <td class="px-4 py-3">${inv.date}</td>
+        <td class="px-4 py-3">${inv.due}</td>
+        <td class="px-4 py-3 font-medium">${fmt2(t.total)}</td>
+        <td class="px-4 py-3"><span class="px-2 py-1 rounded-lg text-[11px] border ${badge}">${inv.status}</span></td>
+        <td class="px-4 py-3 text-right">
+          <button class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800" title="PDF" onclick="printInvoice('${inv.id}')"><i data-lucide="printer" class="w-4 h-4"></i></button>
+          <button class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800" title="Mark Paid" onclick="markPaid('${inv.id}')"><i data-lucide="check-circle" class="w-4 h-4"></i></button>
+        </td>
+      </tr>`;
+    }).join('');
+    $('#invoicesTbody').innerHTML = rows;
+    lucide.createIcons();
+  }
+  window.markPaid = (id)=>{ const inv=byId(state.invoices,id); inv.status='Paid'; save(); addActivity(`Invoice ${inv.number} marked Paid`,'check-circle'); render(); };
+  window.printInvoice = (id)=>{
+    const inv = byId(state.invoices,id); const c = byId(state.clients,inv.clientId); const t = calcInvoiceTotal(inv);
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${inv.number}</title><style>body{font-family:Inter,system-ui;padding:40px;color:#0f172a} h1{margin:0} table{width:100%;border-collapse:collapse;margin-top:20px} th,td{padding:10px;border-bottom:1px solid #e2e8f0;text-align:left} .right{text-align:right} .totals td{border:none} .box{border:1px solid #e2e8f0;border-radius:12px;padding:16px;margin-top:16px}</style></head><body>
+      <div style="display:flex;justify-content:space-between"><div><h1>${state.companyName}</h1><div>TRN: ${c.trn}</div><div>Dubai, UAE</div></div><div style="text-align:right"><h2>${inv.number}</h2><div>Date: ${inv.date}</div><div>Due: ${inv.due}</div></div></div>
+      <div class="box"><strong>Bill To:</strong> ${c.company}<br>${c.name}<br>${c.email}</div>
+      <table><thead><tr><th>Description</th><th class="right">Qty</th><th class="right">Rate</th><th class="right">Amount</th></tr></thead><tbody>
+      ${inv.items.map(it=>`<tr><td>${it.desc}</td><td class="right">${it.qty}</td><td class="right">${fmt2(it.rate)}</td><td class="right">${fmt2(it.qty*it.rate)}</td></tr>`).join('')}
+      </tbody></table>
+      <table class="totals" style="margin-left:auto;width:300px"><tr><td>Subtotal</td><td class="right">${fmt2(t.sub)}</td></tr><tr><td>VAT (${inv.vat}%)</td><td class="right">${fmt2(t.vat)}</td></tr><tr><td><strong>Total (AED)</strong></td><td class="right"><strong>${fmt2(t.total)}</strong></td></tr></table>
+      <p style="margin-top:40px;color:#64748b;font-size:12px">Generated by FlowBooks • Cloudflare Pages ready</p>
+      <script>window.onload=()=>window.print()<\/script></body></html>`;
+    const w = window.open('','_blank'); w.document.write(html); w.document.close();
+  };
+
+  // EXPENSES
+  function renderExpenses(){
+    const months = [...new Set(state.expenses.map(e=>e.date.slice(0,7)))].sort().reverse();
+    const sel = $('#expenseMonth'); if(sel.options.length===0){ sel.innerHTML = '<option value="">All months</option>'+months.map(m=>`<option value="${m}">${new Date(m+'-01').toLocaleDateString('en-GB',{month:'long',year:'numeric'})}</option>`).join(''); sel.onchange=renderExpenses; }
+    const filter = sel.value;
+    const rows = state.expenses.filter(e=>!filter||e.date.startsWith(filter)).filter(e=>!searchQuery||e.description.toLowerCase().includes(searchQuery)).map(e=>{
+      const p = byId(state.projects,e.projectId);
+      return `<tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
+        <td class="px-4 py-3">${e.date}</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-lg text-[11px] bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">${e.category}</span></td>
+        <td class="px-4 py-3">${e.description}</td><td class="px-4 py-3">${p?.name||'—'}</td><td class="px-4 py-3 font-medium">${fmt(e.amount)}</td>
+        <td class="px-4 py-3 text-right"><button class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800" onclick="deleteExpense('${e.id}')"><i data-lucide="trash-2" class="w-4 h-4 text-slate-500"></i></button></td>
+      </tr>`;
+    }).join('');
+    $('#expensesTbody').innerHTML = rows || `<tr><td colspan="6" class="px-4 py-10 text-center text-slate-500">No expenses</td></tr>`;
+    lucide.createIcons();
+  }
+  window.deleteExpense = (id)=>{ if(confirm('Delete expense?')){ state.expenses=state.expenses.filter(e=>e.id!==id); save(); renderExpenses(); } };
+
+  // REPORTS
+  function renderReports(){
+    const labels = ['Dec 23','Jan 24','Feb 24','Mar 24','Apr 24','May 24'];
+    const income = [0,0,0,5250,13125,0];
+    const expenses = [0,0,549,75,160,1870];
+    const profit = income.map((v,i)=>v-expenses[i]);
+    const ctx = $('#plChart'); if(charts.pl) charts.pl.destroy();
+    charts.pl = new Chart(ctx, {type:'bar', data:{labels, datasets:[{label:'Income', data:income, backgroundColor:'#7c3aed'},{label:'Expenses', data:expenses, backgroundColor:'#ef4444'}]}, options:{responsive:true, maintainAspectRatio:false, scales:{y:{beginAtZero:true}}}});
+    $('#plTbody').innerHTML = labels.map((l,i)=>{ const m = profit[i]===0?0:(profit[i]/income[i]*100||0); return `<tr><td class="py-2 pr-4">${l}</td><td class="py-2 pr-4">${fmt(income[i])}</td><td class="py-2 pr-4">${fmt(expenses[i])}</td><td class="py-2 pr-4 ${profit[i]>=0?'text-emerald-600':'text-rose-600'}">${fmt(profit[i])}</td><td class="py-2 pr-4">${income[i]?m.toFixed(0)+'%':'—'}</td></tr>`}).join('');
+    $('#profitTable').innerHTML = state.projects.map(p=>{
+      const invoiced = state.invoices.filter(i=>i.projectId===p.id).reduce((s,i)=>s+calcInvoiceTotal(i).total,0);
+      const margin = p.budget?Math.round((invoiced-(p.spent||0))/p.budget*100):0;
+      return `<div class="p-3 rounded-xl border border-slate-200 dark:border-slate-800"><div class="flex items-center justify-between"><div class="font-medium">${p.name}</div><div class="text-xs ${margin>=0?'text-emerald-600':'text-rose-600'}">${margin}%</div></div><div class="mt-2 h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden"><div class="h-full bg-violet-500" style="width:${Math.min(100, Math.max(0, (invoiced/p.budget*100)||0))}%"></div></div><div class="mt-1 text-[11px] text-slate-500">Invoiced ${fmt(invoiced)} / Budget ${fmt(p.budget)}</div></div>`;
+    }).join('');
+  }
+
+  // ACTIVITY
+  function addActivity(text, icon='activity'){ state.activity.unshift({time:'Just now', text, icon}); state.activity = state.activity.slice(0,12); save(); }
+
+  // MODAL SYSTEM
+  const modal = $('#modal'), mTitle=$('#modalTitle'), mBody=$('#modalBody'), mForm=$('#modalForm');
+  $('#modalClose').onclick = $('#modalCancel').onclick = ()=> modal.close();
+  function openModal(title, bodyHTML, onSubmit){ mTitle.textContent=title; mBody.innerHTML=bodyHTML; modal.showModal(); lucide.createIcons(); mForm.onsubmit = (e)=>{ e.preventDefault(); const data = Object.fromEntries(new FormData(mForm).entries()); onSubmit(data); modal.close(); }; }
+
+  // OPENERS
+  window.openProject = (p=null, defaultStatus='Backlog')=>{
+    const isEdit=!!p;
+    openModal(isEdit?'Edit Project':'New Project', `
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div><label class="text-xs text-slate-500">Name</label><input name="name" required value="${p?.name||''}" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none"></div>
+        <div><label class="text-xs text-slate-500">Client</label><select name="clientId" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">${state.clients.map(c=>`<option value="${c.id}" ${p?.clientId===c.id?'selected':''}>${c.company}</option>`).join('')}</select></div>
+        <div><label class="text-xs text-slate-500">Budget (AED)</label><input type="number" name="budget" value="${p?.budget||0}" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"></div>
+        <div><label class="text-xs text-slate-500">Deadline</label><input type="date" name="deadline" value="${p?.deadline||''}" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"></div>
+        <div><label class="text-xs text-slate-500">Status</label><select name="status" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">${['Backlog','In Progress','Review','Done'].map(s=>`<option ${((p?.status)||defaultStatus)===s?'selected':''}>${s}</option>`).join('')}</select></div>
+        <div class="md:col-span-2"><label class="text-xs text-slate-500">Description</label><textarea name="description" rows="3" class="mt-1 w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">${p?.description||''}</textarea></div>
+      </div>`, (d)=>{
+        if(isEdit){ Object.assign(p, {...d, budget:Number(d.budget)}); } else { state.projects.unshift({id:uid('p'), spent:0, ...d, budget:Number(d.budget)}); }
+        save(); addActivity(`${isEdit?'Updated':'Created'} project "${d.name}"`,'kanban-square'); renderProjects();
+      });
+  };
+  $('#addProjectBtn').onclick = ()=> openProject();
+
+  window.openTask = ()=>{
+    openModal('New Task', `
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="md:col-span-2"><label class="text-xs text-slate-500">Title</label><input name="title" required class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"></div>
+        <div><label class="text-xs text-slate-500">Project</label><select name="projectId" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">${state.projects.map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}</select></div>
+        <div><label class="text-xs text-slate-500">Assignee</label><input name="assignee" value="You" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"></div>
+        <div><label class="text-xs text-slate-500">Due</label><input type="date" name="due" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"></div>
+        <div><label class="text-xs text-slate-500">Priority</label><select name="priority" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"><option>High</option><option selected>Medium</option><option>Low</option></select></div>
+        <div><label class="text-xs text-slate-500">Hours</label><input type="number" name="hours" value="0" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"></div>
+        <div class="flex items-center gap-2 mt-6"><input type="checkbox" name="billable" checked><span class="text-sm">Billable</span></div>
+      </div>`, (d)=>{ state.tasks.unshift({id:uid('t'), status:'Backlog', ...d, hours:Number(d.hours), billable:!!d.billable}); save(); addActivity(`Task "${d.title}" created`,'list-checks'); renderTasks(); });
+  };
+  $('#addTaskBtn').onclick = openTask;
+
+  window.openClient = (id=null)=>{
+    const c = id?byId(state.clients,id):null;
+    openModal(c?'Edit Client':'New Client', `
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div><label class="text-xs text-slate-500">Company</label><input name="company" required value="${c?.company||''}" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border"></div>
+        <div><label class="text-xs text-slate-500">Contact Name</label><input name="name" value="${c?.name||''}" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border"></div>
+        <div><label class="text-xs text-slate-500">Email</label><input name="email" type="email" value="${c?.email||''}" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border"></div>
+        <div><label class="text-xs text-slate-500">Phone</label><input name="phone" value="${c?.phone||''}" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border"></div>
+        <div class="md:col-span-2"><label class="text-xs text-slate-500">TRN (UAE)</label><input name="trn" value="${c?.trn||''}" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border"></div>
+      </div>`, (d)=>{ if(c){ Object.assign(c,d); } else { state.clients.push({id:uid('c'), balance:0, ...d}); } save(); addActivity(`${c?'Updated':'Added'} client "${d.company}"`,'users'); renderClients(); });
+  };
+  $('#addClientBtn').onclick = ()=> openClient();
+
+  window.openInvoice = ()=>{
+    const nextNum = `INV-${new Date().getFullYear()}-${String(state.invoices.length+1).padStart(3,'0')}`;
+    openModal('New Invoice', `
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div><label class="text-xs text-slate-500">Number</label><input name="number" value="${nextNum}" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border"></div>
+        <div><label class="text-xs text-slate-500">Client</label><select name="clientId" id="invClient" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border">${state.clients.map(c=>`<option value="${c.id}">${c.company}</option>`).join('')}</select></div>
+        <div><label class="text-xs text-slate-500">Project</label><select name="projectId" id="invProject" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border"><option value="">—</option>${state.projects.map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}</select></div>
+        <div><label class="text-xs text-slate-500">Date</label><input type="date" name="date" value="${new Date().toISOString().slice(0,10)}" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border"></div>
+        <div><label class="text-xs text-slate-500">Due</label><input type="date" name="due" value="${new Date(Date.now()+14*864e5).toISOString().slice(0,10)}" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border"></div>
+        <div><label class="text-xs text-slate-500">Status</label><select name="status" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border"><option>Draft</option><option selected>Sent</option><option>Paid</option><option>Overdue</option></select></div>
+      </div>
+      <div class="mt-4">
+        <div class="flex items-center justify-between mb-2"><h4 class="font-medium">Line Items</h4><div class="flex gap-2"><button type="button" id="fromHours" class="h-8 px-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-xs">Add from project hours</button><button type="button" id="addLine" class="h-8 px-2.5 rounded-lg bg-violet-600 text-white text-xs">+ Add line</button></div></div>
+        <div class="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-xl">
+          <table class="w-full text-sm"><thead class="bg-slate-50 dark:bg-slate-800/50"><tr><th class="text-left px-3 py-2">Description</th><th class="text-right px-3 py-2 w-24">Qty</th><th class="text-right px-3 py-2 w-32">Rate</th><th class="text-right px-3 py-2 w-32">Amount</th><th class="w-10"></th></tr></thead><tbody id="lineTbody"></tbody></table>
+        </div>
+        <div class="flex justify-end mt-3">
+          <div class="w-full sm:w-72 space-y-1 text-sm"><div class="flex justify-between"><span class="text-slate-500">Subtotal</span><span id="sumSub">AED 0.00</span></div><div class="flex justify-between items-center"><span class="text-slate-500">VAT</span><div class="flex items-center gap-1"><input id="invVat" type="number" value="${state.vatRate}" class="w-16 px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border"> %</div><span id="sumVat">AED 0.00</span></div><div class="flex justify-between font-semibold text-base pt-1 border-t border-slate-200 dark:border-slate-700"><span>Total</span><span id="sumTotal">AED 0.00</span></div></div>
+        </div>
+      </div>`, (d)=>{
+        const items = [...$('#lineTbody').querySelectorAll('tr')].map(tr=>({desc:tr.querySelector('.d').value, qty:Number(tr.querySelector('.q').value||0), rate:Number(tr.querySelector('.r').value||0)}));
+        const inv = {id:uid('i'), number:d.number, clientId:d.clientId, projectId:d.projectId, date:d.date, due:d.due, status:d.status, vat:Number($('#invVat').value)||state.vatRate, items};
+        state.invoices.unshift(inv); const c=byId(state.clients,d.clientId); c.balance=(c.balance||0)+calcInvoiceTotal(inv).total; save(); addActivity(`Invoice ${d.number} created for ${c.company}`,'file-text'); renderInvoices();
+      });
+
+    const tbody = $('#lineTbody');
+    const addRow = (desc='',qty=1,rate=0)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td class="px-2 py-1.5"><input class="d w-full px-2 py-1.5 rounded-lg bg-transparent outline-none" value="${desc}" placeholder="Service"></td><td class="px-2 py-1.5 text-right"><input type="number" class="q w-20 px-2 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-right outline-none" value="${qty}"></td><td class="px-2 py-1.5 text-right"><input type="number" class="r w-28 px-2 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-right outline-none" value="${rate}"></td><td class="px-2 py-1.5 text-right amount">AED 0.00</td><td class="px-2"><button type="button" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800" onclick="this.closest('tr').remove();recalc()"><i data-lucide="x" class="w-4 h-4"></i></button></td>`; tbody.appendChild(tr); tr.querySelectorAll('input').forEach(i=>i.addEventListener('input',recalc)); lucide.createIcons(); recalc(); };
+    const recalc = ()=>{ let sub=0; [...tbody.querySelectorAll('tr')].forEach(tr=>{ const q=Number(tr.querySelector('.q').value||0), r=Number(tr.querySelector('.r').value||0); const a=q*r; sub+=a; tr.querySelector('.amount').textContent=fmt2(a); }); const vatPct=Number($('#invVat').value||0); const vat=sub*vatPct/100; $('#sumSub').textContent=fmt2(sub); $('#sumVat').textContent=fmt2(vat); $('#sumTotal').textContent=fmt2(sub+vat); };
+    $('#addLine').onclick = ()=> addRow();
+    $('#fromHours').onclick = ()=>{ const pid=$('#invProject').value; if(!pid) return alert('Select a project'); const hrs = state.tasks.filter(t=>t.projectId===pid && t.billable).reduce((s,t)=>s+t.hours,0); addRow(`Professional services — ${byId(state.projects,pid).name}`, hrs, 325); };
+    $('#invVat').addEventListener('input',recalc);
+    addRow('Discovery & Design',1,12500); addRow('Development Sprint',40,312.5);
+  };
+  $('#addInvoiceBtn').onclick = openInvoice;
+
+  window.openExpense = ()=>{
+    openModal('New Expense', `
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div><label class="text-xs text-slate-500">Date</label><input type="date" name="date" value="${new Date().toISOString().slice(0,10)}" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border"></div>
+        <div><label class="text-xs text-slate-500">Category</label><select name="category" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border"><option>Software</option><option>Office</option><option>Travel</option><option>Marketing</option><option>Hardware</option><option>Other</option></select></div>
+        <div class="md:col-span-2"><label class="text-xs text-slate-500">Description</label><input name="description" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border"></div>
+        <div><label class="text-xs text-slate-500">Amount (AED)</label><input type="number" name="amount" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border"></div>
+        <div><label class="text-xs text-slate-500">Project</label><select name="projectId" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border"><option value="">—</option>${state.projects.map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}</select></div>
+        <div class="md:col-span-2"><label class="text-xs text-slate-500">Receipt / Note</label><input name="receipt" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 border"></div>
+      </div>`, (d)=>{ state.expenses.unshift({id:uid('e'), ...d, amount:Number(d.amount)}); save(); addActivity(`Expense ${fmt(d.amount)} — ${d.description}`,'receipt'); renderExpenses(); });
+  };
+  $('#addExpenseBtn').onclick = openExpense;
+
+  // SIDEBAR ENHANCEMENTS
+  function updateSidebar(){
+    // Active states
+    $$('.nav-btn').forEach(b=> b.classList.toggle('active', b.dataset.nav===currentView));
+    
+    // Badges
+    const outstanding = state.invoices.filter(i=>i.status==='Sent'||i.status==='Overdue').length;
+    const badgeInv = $('#badge-invoices');
+    if(badgeInv){ badgeInv.textContent = outstanding; badgeInv.classList.toggle('hidden', outstanding===0); }
+    
+    const activeProjects = state.projects.filter(p=>p.status!=='Done').length;
+    const badgeProj = $('#badge-projects');
+    if(badgeProj){ badgeProj.textContent = activeProjects; badgeProj.classList.toggle('hidden', activeProjects===0); }
+    
+    // Recent projects
+    const recent = $('#recentProjects');
+    if(recent){
+      recent.innerHTML = state.projects.slice(0,3).map(p=>`
+        <button onclick="navigate('projects')" class="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/5 text-left">
+          <span class="size-6 grid place-items-center rounded-md bg-white/10 text-[10px]">${p.name.slice(0,2).toUpperCase()}</span>
+          <div class="flex-1 min-w-0">
+            <div class="text-[12px] truncate">${p.name}</div>
+            <div class="text-[10px] text-slate-500">${p.status}</div>
+          </div>
+        </button>
+      `).join('') || '<div class="px-2 py-1 text-[11px] text-slate-500">No projects</div>';
+    }
+    
+    // User info - fetch from API if available, fallback to local
+    const userName = $('#userName'), userEmail = $('#userEmail'), userAvatar = $('#userAvatar');
+    fetch('/api/user').then(r=>r.ok?r.json():null).catch(()=>null).then(u=>{
+      if(u && u.email){
+        userName.textContent = u.name || u.email.split('@')[0];
+        userEmail.textContent = u.email;
+        userAvatar.src = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(u.name||u.email)}`;
+      } else {
+        // Demo for Dubai
+        userName.textContent = 'Sarah Al-Mansoori';
+        userEmail.textContent = 'sarah@lumenstudio.ae';
+        userAvatar.src = 'https://api.dicebear.com/7.x/initials/svg?seed=SA';
+      }
+    });
+  }
+
+  // Sidebar collapse
+  let sidebarCollapsed = localStorage.getItem('fb_sidebar')==='1';
+  function applySidebar(){
+    const sb = $('#sidebar');
+    sb.classList.toggle('w-[72px]', sidebarCollapsed);
+    sb.classList.toggle('w-[288px]', !sidebarCollapsed);
+    sb.classList.toggle('lg:w-[72px]', sidebarCollapsed);
+    sb.classList.toggle('lg:w-[288px]', !sidebarCollapsed);
+    $$('.sidebar-label').forEach(el=> el.classList.toggle('hidden', sidebarCollapsed));
+    sb.classList.toggle('sidebar-collapsed', sidebarCollapsed);
+  }
+  $('#sidebarToggle')?.addEventListener('click', ()=>{
+    sidebarCollapsed = !sidebarCollapsed;
+    localStorage.setItem('fb_sidebar', sidebarCollapsed?'1':'0');
+    applySidebar();
+  });
+  $('#closeSidebar')?.addEventListener('click', ()=>{ $('#sidebar').classList.add('-translate-x-full'); $('#backdrop').classList.add('hidden'); });
+
+  // Quick create menu
+  $('#quickCreate')?.addEventListener('click', ()=>{
+    openModal('Quick Create', `<div class="grid grid-cols-2 gap-3">
+      <button class="p-3 rounded-xl border hover:bg-slate-50 dark:hover:bg-slate-800 text-left" onclick="modal.close(); openInvoice()"><i data-lucide="file-text" class="w-4 h-4 mb-1"></i><div class="text-sm font-medium">Invoice</div></button>
+      <button class="p-3 rounded-xl border hover:bg-slate-50 dark:hover:bg-slate-800 text-left" onclick="modal.close(); openExpense()"><i data-lucide="receipt" class="w-4 h-4 mb-1"></i><div class="text-sm font-medium">Expense</div></button>
+      <button class="p-3 rounded-xl border hover:bg-slate-50 dark:hover:bg-slate-800 text-left" onclick="modal.close(); openProject()"><i data-lucide="kanban-square" class="w-4 h-4 mb-1"></i><div class="text-sm font-medium">Project</div></button>
+      <button class="p-3 rounded-xl border hover:bg-slate-50 dark:hover:bg-slate-800 text-left" onclick="modal.close(); openTask()"><i data-lucide="list-checks" class="w-4 h-4 mb-1"></i><div class="text-sm font-medium">Task</div></button>
+    </div>`, ()=>{});
+    setTimeout(()=>lucide.createIcons(),0);
+  });
+
+  // Sidebar search
+  $('#sidebarSearch')?.addEventListener('input', (e)=>{
+    const q = e.target.value.toLowerCase();
+    if(!q) return;
+    searchQuery = q;
+    if(q.includes('inv')) navigate('invoices');
+    else if(q.includes('exp')) navigate('expenses');
+    else if(q.includes('proj')) navigate('projects');
+    render();
+  });
+
+  // === NEW ACCOUNTING MODULES ===
+  window.openQuotation = ()=>{
+    openModal('New Quotation', `<div class="grid grid-cols-2 gap-4"><div><label class="text-xs">Client</label><select name="client" class="w-full h-9 border rounded-lg px-2 mt-1">${state.clients.map(c=>`<option>${c.company}</option>`).join('')}</select></div><div><label class="text-xs">Amount (AED)</label><input name="amount" type="number" class="w-full h-9 border rounded-lg px-2 mt-1"></div><div class="col-span-2"><label class="text-xs">Scope</label><textarea name="scope" rows="3" class="w-full border rounded-lg px-2 mt-1"></textarea></div></div>`, (d)=>{
+      const q = {id:uid('q'), number:'QT-'+Date.now(), client:d.client, total:Number(d.amount), status:'Sent', date:new Date().toISOString().slice(0,10)};
+      state.quotations = state.quotations||[]; state.quotations.unshift(q); save(); addActivity(`Quotation ${q.number} sent`,'file-signature'); renderQuotations();
+    });
+  };
+  function renderQuotations(){
+    const tbody = $('#quotationsTbody'); if(!tbody) return;
+    const qs = state.quotations||[];
+    tbody.innerHTML = qs.map(q=>`<tr class="border-t"><td class="px-4 py-2 font-medium">${q.number}</td><td class="px-4 py-2">${q.client}</td><td class="px-4 py-2">${q.date}</td><td class="px-4 py-2">${fmt(q.total)}</td><td class="px-4 py-2"><span class="px-2 py-0.5 rounded text-xs bg-violet-500/10 text-violet-700">${q.status}</span></td><td class="px-4 py-2 text-right"><button onclick="convertToInvoice('${q.id}')" class="text-xs px-2 py-1 rounded bg-emerald-600 text-white">Convert</button></td></tr>`).join('') || '<tr><td colspan=6 class="px-4 py-8 text-center text-slate-500">No quotations</td></tr>';
+  }
+  window.convertToInvoice = (id)=>{ const q=(state.quotations||[]).find(x=>x.id===id); if(!q) return; openInvoice(); addActivity(`Converted ${q.number} to invoice`,'file-text'); };
+
+  window.openBill = ()=>{ openModal('New Vendor Bill', `<div class="grid grid-cols-2 gap-3"><div><label class="text-xs">Vendor</label><input name="vendor" class="w-full h-9 border rounded px-2 mt-1"></div><div><label class="text-xs">Amount</label><input name="amount" type="number" class="w-full h-9 border rounded px-2 mt-1"></div></div>`, (d)=>{ state.bills=state.bills||[]; state.bills.unshift({id:uid('b'), vendor:d.vendor, total:Number(d.amount), status:'Unpaid'}); save(); renderBills(); }); };
+  function renderBills(){ const tb=$('#billsTbody'); if(!tb) return; tb.innerHTML = (state.bills||[]).map(b=>`<tr class="border-t"><td class="px-4 py-2">${b.id}</td><td class="px-4 py-2">${b.vendor}</td><td class="px-4 py-2">—</td><td class="px-4 py-2">${fmt(b.total)}</td><td class="px-4 py-2">${b.status}</td></tr>`).join(''); }
+
+  window.loadVAT = async ()=>{
+    const s=$('#vatStart').value, e=$('#vatEnd').value;
+    // Try API, fallback to local calc
+    try{
+      const r = await fetch(`/api/tax/vat?start=${s}&end=${e}`); const d = await r.json();
+      $('#vatResult').innerHTML = `<div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800"><div class="text-xs text-slate-500">Output VAT</div><div class="text-xl font-semibold">${fmt(d.vat_collected)}</div></div><div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800"><div class="text-xs">Input VAT</div><div class="text-xl font-semibold">${fmt(d.vat_paid)}</div></div><div class="p-4 rounded-xl bg-emerald-500/10"><div class="text-xs">Payable to FTA</div><div class="text-xl font-semibold text-emerald-700">${fmt(d.vat_payable)}</div></div>`;
+    }catch{
+      $('#vatResult').innerHTML = '<div class="col-span-3 text-slate-500">Connect to D1 for live VAT</div>';
+    }
+  };
+
+  function renderCOA(){
+    const tb=$('#coaTbody'); if(!tb) return;
+    const coa = [
+      {code:'1000',name:'Cash',type:'Asset',bal:150000},
+      {code:'1100',name:'Bank - ENBD',type:'Asset',bal:150000},
+      {code:'1200',name:'Accounts Receivable',type:'Asset',bal:state.invoices.reduce((s,i)=>s+(i.status!=='Paid'?calcInvoiceTotal(i).total:0),0)},
+      {code:'1300',name:'VAT Input',type:'Asset',bal:1250},
+      {code:'2000',name:'Accounts Payable',type:'Liability',bal:8400},
+      {code:'2100',name:'VAT Output Payable',type:'Liability',bal:2625},
+      {code:'4000',name:'Service Revenue',type:'Revenue',bal:18375},
+      {code:'5000',name:'Project Expenses',type:'Expense',bal:2105},
+    ];
+    tb.innerHTML = coa.map(a=>`<tr class="border-t hover:bg-slate-50/50"><td class="px-4 py-2 font-mono">${a.code}</td><td class="px-4 py-2">${a.name}</td><td class="px-4 py-2 text-xs"><span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800">${a.type}</span></td><td class="px-4 py-2 text-right font-medium">${fmt(a.bal)}</td></tr>`).join('');
+  }
+
+  // Debtor/Creditor Management
+  function renderDebtors(){
+    // Fetch from API or use local
+    fetch('/api/customers/debtors').then(r=>r.ok?r.json():null).catch(()=>null).then(data=>{
+      const debtors = data || state.clients.map(c=>{
+        const due = state.invoices.filter(i=>i.clientId===c.id && i.status!=='Paid').reduce((s,i)=>s+calcInvoiceTotal(i).total,0);
+        return {company:c.company, name:c.name, payment_terms:c.payment_terms||30, credit_limit:c.credit_limit||50000, total_due:due, bucket_0_30:due*0.6, bucket_31_60:due*0.3, bucket_61_90:due*0.1, bucket_90_plus:0};
+      });
+      $('#totalAR').textContent = fmt(debtors.reduce((s,d)=>s+d.total_due,0));
+      $('#ar30').textContent = fmt(debtors.reduce((s,d)=>s+d.bucket_0_30,0));
+      $('#ar60').textContent = fmt(debtors.reduce((s,d)=>s+d.bucket_31_60,0));
+      $('#ar90').textContent = fmt(debtors.reduce((s,d)=>s+d.bucket_90_plus,0));
+      $('#debtorsTbody').innerHTML = debtors.map(d=>`<tr class="border-t hover:bg-slate-50/50"><td class="px-4 py-2 font-medium">${d.company}</td><td class="px-4 py-2">${d.payment_terms} days</td><td class="px-4 py-2">${fmt(d.credit_limit)}</td><td class="px-4 py-2 text-right font-medium">${fmt(d.total_due)}</td><td class="px-4 py-2 text-right">${fmt(d.bucket_0_30)}</td><td class="px-4 py-2 text-right">${fmt(d.bucket_31_60)}</td><td class="px-4 py-2 text-right">${fmt(d.bucket_61_90)}</td><td class="px-4 py-2 text-right">${fmt(d.bucket_90_plus)}</td><td class="px-4 py-2 text-right"><button onclick="viewStatement('${d.id||'demo'}','customer')" class="text-xs text-violet-600">SOA</button></td></tr>`).join('');
+    });
+  }
+  function renderCreditors(){
+    fetch('/api/suppliers/creditors').then(r=>r.ok?r.json():null).catch(()=>null).then(data=>{
+      const creditors = data || [{company:'Al-Futtaim Supplies', payment_terms:30, total_due:8400, bucket_0_30:5000, bucket_31_60:3400, bucket_61_90:0, bucket_90_plus:0}];
+      $('#totalAP').textContent = fmt(creditors.reduce((s,c)=>s+c.total_due,0));
+      $('#ap30').textContent = fmt(creditors.reduce((s,c)=>s+c.bucket_0_30,0));
+      $('#apDue').textContent = creditors.length;
+      $('#supplierCount').textContent = creditors.length;
+      $('#creditorsTbody').innerHTML = creditors.map(c=>`<tr class="border-t hover:bg-slate-50/50"><td class="px-4 py-2 font-medium">${c.company}</td><td class="px-4 py-2">${c.payment_terms} days</td><td class="px-4 py-2 text-right font-medium">${fmt(c.total_due)}</td><td class="px-4 py-2 text-right">${fmt(c.bucket_0_30)}</td><td class="px-4 py-2 text-right">${fmt(c.bucket_31_60)}</td><td class="px-4 py-2 text-right">${fmt(c.bucket_90_plus)}</td><td class="px-4 py-2 text-right"><button onclick="viewStatement('${c.id||'demo'}','supplier')" class="text-xs text-violet-600 mr-2">SOA</button><button class="text-xs text-emerald-600">Pay</button></td></tr>`).join('');
+    });
+  }
+  window.viewStatement = (id, type='customer')=>{
+    const isCustomer = type==='customer';
+    const url = isCustomer ? `/api/customers/statement?client_id=${id}&start=2026-01-01&end=2026-12-31` : `/api/suppliers/statement?vendor_id=${id}&start=2026-01-01&end=2026-12-31`;
+    fetch(url).then(r=>r.ok?r.json():null).catch(()=>null).then(d=>{
+      if(!d){ // fallback demo
+        d = isCustomer ? {client:{company:'Demo Client'}, opening:0, invoiced:18375, paid:5000, closing:13375, invoices:[{number:'INV-2026-1001',date:'2026-01-15',total:5250},{number:'INV-2026-1002',date:'2026-02-20',total:13125}], payments:[{date:'2026-03-01',amount:5000}]} : {vendor:{company:'Demo Supplier'}, opening:0, billed:8400, paid:0, closing:8400, bills:[{number:'BILL-1001',date:'2026-02-01',total:8400}]};
+      }
+      const entity = d.client || d.vendor;
+      const rows = (d.invoices||d.bills||[]).map(t=>`<tr><td class="py-1.5">${t.date||t.issue_date}</td><td>${t.number}</td><td>${t.description||'Invoice'}</td><td class="text-right">${fmt(t.total)}</td><td class="text-right">${t.amount?fmt(t.amount):''}</td><td class="text-right font-medium">${fmt(t.total-(t.amount||0))}</td></tr>`).join('');
+      const payRows = (d.payments||[]).map(p=>`<tr><td class="py-1.5">${p.date}</td><td>PAYMENT</td><td>Payment received</td><td class="text-right"></td><td class="text-right text-emerald-600">-${fmt(p.amount)}</td><td></td></tr>`).join('');
+      openModal(`Statement of Account - ${entity.company}`, `
+        <div class="space-y-4">
+          <div class="flex justify-between items-start">
+            <div><div class="text-sm text-slate-500">Period</div><div class="font-medium">${d.period?.start||'2026-01-01'} to ${d.period?.end||'2026-12-31'}</div></div>
+            <div class="text-right"><div class="text-sm text-slate-500">Closing Balance</div><div class="text-2xl font-semibold ${d.closing>0?'text-rose-600':'text-emerald-600'}">${fmt(d.closing)}</div></div>
+          </div>
+          <div class="grid grid-cols-4 gap-3 text-center">
+            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800"><div class="text-xs text-slate-500">Opening</div><div class="font-semibold">${fmt(d.opening)}</div></div>
+            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800"><div class="text-xs text-slate-500">${isCustomer?'Invoiced':'Billed'}</div><div class="font-semibold">${fmt(d.invoiced||d.billed)}</div></div>
+            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800"><div class="text-xs text-slate-500">Paid</div><div class="font-semibold text-emerald-600">${fmt(d.paid)}</div></div>
+            <div class="p-3 rounded-xl bg-violet-500/10"><div class="text-xs">Balance Due</div><div class="font-semibold">${fmt(d.closing)}</div></div>
+          </div>
+          <div class="border rounded-xl overflow-hidden">
+            <table class="w-full text-sm"><thead class="bg-slate-50 dark:bg-slate-800/50"><tr><th class="text-left px-3 py-2">Date</th><th class="text-left px-3 py-2">Ref</th><th class="text-left px-3 py-2">Description</th><th class="text-right px-3 py-2">Debit</th><th class="text-right px-3 py-2">Credit</th><th class="text-right px-3 py-2">Balance</th></tr></thead><tbody class="divide-y">${rows}${payRows}</tbody></table>
+          </div>
+          <div class="flex justify-between items-center pt-2 border-t">
+            <div class="text-xs text-slate-500">Generated ${new Date().toLocaleDateString('en-GB')} • FlowBooks</div>
+            <div class="flex gap-2"><button onclick="window.print()" class="h-8 px-3 rounded-lg border text-xs">Print PDF</button><button onclick="navigator.clipboard.writeText('SOA for ${entity.company}')" class="h-8 px-3 rounded-lg bg-violet-600 text-white text-xs">Copy Link</button></div>
+          </div>
+        </div>
+      `, ()=>{});
+      setTimeout(()=>{ document.querySelector('#modal').classList.add('max-w-[900px]'); },0);
+    });
+  };
+  window.openSupplier = ()=>{ openModal('New Supplier', `<div class="grid grid-cols-2 gap-3"><div><label class="text-xs">Company</label><input name="company" class="w-full h-9 border rounded px-2 mt-1"></div><div><label class="text-xs">TRN</label><input name="trn" class="w-full h-9 border rounded px-2 mt-1"></div><div><label class="text-xs">Payment Terms</label><select name="terms" class="w-full h-9 border rounded px-2 mt-1"><option>30 days</option><option>60 days</option></select></div><div><label class="text-xs">Credit Limit</label><input name="limit" type="number" class="w-full h-9 border rounded px-2 mt-1"></div></div>`, ()=>{ addActivity('Supplier added','building'); renderCreditors(); }); };
+
+  // Tabs
+  document.addEventListener('click', (e)=>{ if(e.target.matches('[data-tab]')){ document.querySelectorAll('[data-tab]').forEach(b=>{ b.classList.toggle('border-violet-600', b===e.target); b.classList.toggle('text-slate-500', b!==e.target); }); $('#debtorsTab').classList.toggle('hidden', e.target.dataset.tab!=='debtors'); $('#creditorsTab').classList.toggle('hidden', e.target.dataset.tab!=='creditors'); }});
+
+  window.openEstimate = ()=>{
+    openModal('Project Build-Up Estimate', `<div class="space-y-3"><div><label class="text-xs">Project</label><select name="project" class="w-full h-9 border rounded px-2 mt-1">${state.projects.map(p=>`<option>${p.name}</option>`).join('')}</select></div><div class="grid grid-cols-4 gap-2 text-xs font-medium"><span>Item</span><span>Qty</span><span>Cost</span><span>Price</span></div><div id="estRows" class="space-y-2"></div><button type="button" onclick="addEstRow()" class="text-xs px-2 py-1 border rounded">+ Add line</button></div>`, (d)=>{ addActivity('Build-up estimate created','trending-up'); renderBuildup(); });
+    setTimeout(()=>{ window.addEstRow=()=>{ $('#estRows').insertAdjacentHTML('beforeend', `<div class="grid grid-cols-4 gap-2"><input class="border rounded px-1 h-8 text-xs" placeholder="Labor"><input type="number" class="border rounded px-1 h-8 text-xs" value="1"><input type="number" class="border rounded px-1 h-8 text-xs" value="250"><input type="number" class="border rounded px-1 h-8 text-xs" value="350"></div>`); }; addEstRow(); addEstRow(); },0);
+  };
+  function renderBuildup(){
+    const el=$('#buildupView'); if(!el) return;
+    el.innerHTML = state.projects.map(p=>{
+      const estCost = 28000, estPrice = 45000;
+      return `<div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border"><div class="flex justify-between items-start"><div><h4 class="font-semibold">${p.name}</h4><p class="text-xs text-slate-500">Build-up vs Actual</p></div><span class="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-700">Active</span></div><div class="mt-4 space-y-2 text-sm"><div class="flex justify-between"><span>Estimated Cost</span><span>${fmt(estCost)}</span></div><div class="flex justify-between"><span>Estimated Price</span><span>${fmt(estPrice)}</span></div><div class="flex justify-between"><span>Actual Cost</span><span>${fmt(p.spent||8400)}</span></div><div class="flex justify-between font-semibold border-t pt-2"><span>Projected Margin</span><span class="text-emerald-600">${Math.round((estPrice-estCost)/estPrice*100)}%</span></div></div></div>`;
+    }).join('');
+  }
+  window.closeoutProject = ()=>{
+    if(!confirm('Teardown project? This will close project, calculate final P&L, and archive.')) return;
+    const p = state.projects[0];
+    fetch('/api/projects/closeout', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({project_id:p.id})}).catch(()=>{});
+    p.status='Closed'; save(); addActivity(`Project "${p.name}" torn down`,'archive'); render();
+  };
+
+  // Extend render
+  const _renderOrig = render; render = ()=>{ _renderOrig(); updateSidebar(); renderQuotations(); renderBills(); renderCOA(); renderBuildup(); renderDebtors(); renderCreditors(); };
+
+  // INIT
+  function init(){ applySidebar(); navigate('dashboard'); render(); }
+  document.addEventListener('DOMContentLoaded', ()=>{ lucide.createIcons(); init(); });
+})();
+</script>
+</body>
+</html>

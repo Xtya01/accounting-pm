@@ -1,0 +1,17 @@
+name = "accounting-pm"
+compatibility_date = "2026-04-01"
+pages_build_output_dir = "."
+
+[[d1_databases]]
+binding = "DB"
+database_name = "accounting_pm_db"
+database_id = "134e9aa2-54fc-4931-b5c8-effab8987f55"
+
+[[r2_buckets]]
+binding = "RECEIPTS"
+bucket_name = "accounting-receipts"
+
+[vars]
+ENVIRONMENT = "production"
+DEFAULT_CURRENCY = "AED"
+DEFAULT_VAT = "5.0"
